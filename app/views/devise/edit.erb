@@ -1,0 +1,17 @@
+<h2>Confirm your mobile phone by OTP</h2>
+
+<%= form_for(resource, as: resource_name, url: phone_confirmation_path(resource_name), html: {method: :put}) do |f| %>
+  <%= render "devise/shared/error_messages", resource: resource %>
+
+  <div class="field">
+    <%= f.hidden_field :phone %>
+    <%= f.hidden_field :otp_prefix %>
+    <%= f.label :otp_check, "Check your OTP with prefix: #{resource.otp_prefix}" %><br/>
+    <%= f.text_field :otp_check, autofocus: true %>
+  </div>
+
+  <div class="actions">
+    <%= f.submit "Send mobile confirmation code" %>
+  </div>
+<% end %>
+<%= render "devise/shared/links" %>
