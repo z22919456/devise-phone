@@ -1,12 +1,14 @@
 # frozen_string_literal: true
+
+require 'active_record'
 require 'devise-phone/version'
 require 'devise-phone/routes'
 require 'devise-phone/rails'
 require 'devise-phone/models/phone_confirmable'
-require 'devise-phone/models/otp_verified'
+require 'devise-phone/models/otp_verifiable'
+require 'devise-phone/models/active_record/otp_verification'
 require 'devise-phone/otp_generator'
 require 'devise'
-require 'devise-phone/models/active_record/otp_verification'
 
 module Devise
   mattr_accessor :otp_length
@@ -23,4 +25,4 @@ module Devise
 end
 
 Devise.add_module :phone_confirmable, controller: :phone_confirmations, route: { phone_confirmation: [nil, :new] }
-Devise.add_module :otp_verified
+Devise.add_module :otp_verifiable
