@@ -2,7 +2,7 @@
 
 class OTPVerification < ActiveRecord::Base
   belongs_to :resource, polymorphic: true
-  before_save :generate_otp
+  before_commit :set_phone_number_and_generate_otp
   attr_accessor :otp_check
 
   def verify(_attriables)
@@ -28,11 +28,9 @@ class OTPVerification < ActiveRecord::Base
 
   protected
 
-  def generate_otp
-    if otp.nil?
-      self.otp, self.otp_prefix = DevisePhone::OTPGenerator.generate_otp(Devise.otp_length, Devise.generate_prefix)
-      save!
-    end
-    true
+  def set_phone_number_and_generate_otp
+    self.phone = resource.phone
+    self.otp, self.otp_prefix = DevisePhone::OTPGenerator.generate_otp(Devise.otp_length, Devise.generate_prefix)
+    save!
   end
 end
