@@ -20,9 +20,23 @@ Or install it yourself as:
 
     $ gem install devise-phone
 
-## Usage
+## Getting Started
 
-TODO: Write usage instructions here
+After you installed Devise Phone you need to run the generator.
+
+```ruby
+rails generate devise_phone:install
+rails generate devise_phone MODEL
+```
+
+The generator adds optional configurations to config/initializers/devise_phone.rb. Devise Phone provide 2 models, you cans add to your Devise models:
+
+```ruby
+devise :phone_confirmable, :otp_verify
+```
+
+TODO: 還沒翻譯完，也還沒寫完
+
 
 ## Development
 
