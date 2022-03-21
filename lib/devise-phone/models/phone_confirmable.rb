@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Devise
   module Models
     # Phone Confirmable is responsible to verify if an account is already confirmed to
@@ -7,41 +9,27 @@ module Devise
     #
     # Phone Confirmable tracks the following columns:
     #
-    # * phone                - User's phone number
-    # * otp                  - A random password
-    # * otp_prefix           -
-    # * confirmation_token   - A unique random token
-    # * confirmed_at         - A timestamp when the user clicked the confirmation link
-    # * confirmation_sent_at - A timestamp when the confirmation_token was generated (not sent)
-    # * unconfirmed_email    - An email address copied from the email attr. After confirmation
-    #                          this value is copied to the email attr then cleared
+    # * phone                       - User's phone number
+    # * otp                         - A random password
+    # * otp_prefix                  - A random letters
+    # * phone_confirmed_at          - A timestamp when the user input the correct OTP
+    # * phoen_confirmation_sent_at  - A timestamp when the otp was generated (not sent)
     #
     # == Options
     #
-    # Confirmable adds the following options to +devise+:
+    # Phone Confirmable adds the following options to +devise+:
     #
-    #   * +allow_unconfirmed_access_for+: the time you want to allow the user to access their account
-    #     before confirming it. After this period, the user access is denied. You can
-    #     use this to let your user access some features of your application without
-    #     confirming the account, but blocking it after a certain period (ie 7 days).
-    #     By default allow_unconfirmed_access_for is zero, it means users always have to confirm to sign in.
-    #   * +reconfirmable+: requires any email changes to be confirmed (exactly the same way as
-    #     initial account confirmation) to be applied. Requires additional unconfirmed_email
-    #     db field to be set up (t.reconfirmable in migrations). Until confirmed, new email is
-    #     stored in unconfirmed email column, and copied to email column on successful
-    #     confirmation. Also, when used in conjunction with `send_email_changed_notification`,
-    #     the notification is sent to the original email when the change is requested,
-    #     not when the unconfirmed email is confirmed.
-    #   * +confirm_within+: the time before a sent confirmation token becomes invalid.
-    #     You can use this to force the user to confirm within a set period of time.
-    #     Confirmable will not generate a new token if a repeat confirmation is requested
-    #     during this time frame, unless the user's email changed too.
+    #   * +otp_length+: default is 6 random numbers, you can change otp length by this option
+    #   * +generate_prefix+: should generate OTP prefix, prefix is a random letters for OTP.
+    #     User can make sure that prefix on SMS is same as OTP from label that avoid confusion
+    #     with previously OTP
+    #   * +:otp_available_time+: time available for OTP, within 10 minutes after generate by default.
     #
     # == Examples
     #
-    #   User.find(1).confirm       # returns true unless it's already confirmed
-    #   User.find(1).confirmed?    # true/false
-    #   User.find(1).send_confirmation_instructions # manually send instructions
+    #   User.find(1).phone_confirm                            # returns true unless it's already confirmed
+    #   User.find(1).phone_confirmed?                         # true/false
+    #   User.find(1).send_and_generate_phone_confirmation_otp # manually send and generate phone confirm OTP
     #
     module PhoneConfirmable
       extend ActiveSupport::Concern
@@ -49,21 +37,21 @@ module Devise
       included do
         attr_accessor :otp_check
 
-        after_commit :send_phone_confirmation_otp, on: %i[create update], if: phone.present?
+        after_commit :send_and_generate_phone_confirmation_otp, on: %i[create update], if: -> { phone.present? }
       end
 
       def self.required_fields(_klass)
         %i[phone phone_confirmed_at otp_prefix otp phone_confirmation_otp_send_at]
       end
 
-      def send_phone_confirmation_otp(params)
-        generate_confirm_otp!(params)
+      def send_and_generate_phone_confirmation_otp
+        generate_confirm_otp!
         send_otp_sms
       end
 
       def send_otp_sms; end
 
-      def phone_confirm_by_otp(attriables = {})
+      def phone_confirm_by_otp(attriables)
         errors.add(:phone, :phone_already_confirmed) and return if phone_confirmed?
         errors.add(:phone, :otp_expired) and return if otp_expired?
 
@@ -111,7 +99,7 @@ module Devise
           confirmable
         end
 
-        def send_phone_confirmation_otp(phone)
+        def send_and_generate_phone_confirmation_otp(phone)
           confirmable = find_or_initialize_with_error_by(:phone, phone)
           return confirmable unless confirmable.persisted?
 
