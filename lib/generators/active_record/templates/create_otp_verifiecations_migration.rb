@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class DeviseCreateOTPVerifications < ActiveRecord::Migration<%= migration_version %>
+class DeviseCreateOtpVerifications < ActiveRecord::Migration<%= migration_version %>
   def change
     create_table :otp_verifications do |t|
       t.belongs_to :resource, polymorphic: true
