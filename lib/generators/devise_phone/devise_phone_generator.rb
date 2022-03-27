@@ -7,7 +7,7 @@ module Devise
 
       def inject_devise_phone_confirmable_content
         path = File.join('app', 'models', "#{file_path}.rb")
-        inject_into_file(path, 'phone_confirmation, :', after: 'devise :') if File.exist?(path)
+        inject_into_file(path, 'phone_confirmable, :', after: 'devise :') if File.exist?(path)
       end
 
       hook_for :orm
